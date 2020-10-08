@@ -1,6 +1,5 @@
 # https://saldanha3193.github.io/gssdataset/
 
-
 <!DOCTYPE html>
 
 <html>
@@ -10,8 +9,6 @@
 <meta charset="utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-
-
 
 
 <title>Statistical inference with the GSS data</title>
