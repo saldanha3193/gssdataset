@@ -1,4 +1,4 @@
-#Exploration and Inference of GSS survey Data
+# Exploration and Inference of GSS survey Data
 
 https://saldanha3193.github.io/gssdataset/
 
