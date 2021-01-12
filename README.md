@@ -2,6 +2,13 @@
 
 https://saldanha3193.github.io/gssdataset/
 
+General Social Survey Dataset
+
+The GSS gathers data on American society in order to monitor and explain trends in attitudes, behaviors, and attributes. The GSS contains a standard core of demographic, behavioral, and attitudinal questions, plus topics of special interest.
+
+This repo contains data from the GSS 2018 survey, along with the GSS codebook which provides more details about the variables collected. If you are interested in examining other years of the GSS, visit http://gss.norc.org/Get-The-Data to download the data.
+
+
 In this project I have explored the data to see how has the opinion of people not in favor of medical care varied over the years? Is there any statistical significance in the variation noted.
 
 As per the article dated 2017 in the pew research, 60% Americans say that government should be responsible for ensuring health care coverage for all Americans, compared with 38% who say this should not be the government's responsibility.
