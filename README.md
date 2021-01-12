@@ -1,6 +1,6 @@
+https://saldanha3193.github.io/gssdataset/
+
 # Exploration and Inference of GSS survey Data
-
-
 
 General Social Survey Dataset
 
