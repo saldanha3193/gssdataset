@@ -1,0 +1,232 @@
+---
+title: "Statistical inference with the GSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+
+library(tidyverse)
+library(statsr)
+
+
+```
+
+### Load data
+
+
+```{r load-data}
+load("gss.Rdata")
+```
+
+
+
+* * *
+
+## Part 1: Data
+
+**Data Generalisability**
+
+As per Wikipedia the General Social Survey (GSS), collects data from adults (18+) living in households in the United States. The GSS sample is drawn using an area probability design that randomly selects respondents in households across the United States to take part in the survey. Respondents that become part of the GSS sample are from a mix of urban, suburban, and rural geographic areas. Participation in the study is strictly voluntary. However, because only about a few thousand respondents are interviewed in the main study, every respondent selected is very important to the results.The survey is conducted face-to-face with an in-person interview by NORC at the University of Chicago. 
+
+Since this survey is a voluntary response survey, there are some potential biases where only those interested to participate, also there is the possibility of under-reporting.
+Also as per Wikipedia, it was not until 2016 that Spanish speaking adults where included in the survey.
+
+However, since the survey performs random sampling, the conclusions of the analysis can be generalized to the larger US population, keeping the above mentioned potential biases in consideration.
+
+
+**Data Causality**
+
+The GSS survey being an observational study, with no random assignment to treatments, only correlations can be considered and no causation can be derived. 
+
+* * *
+
+## Part 2: Research question
+
+How has the opinion of people not in favor of medical care varied over the years? Is there any statistical significance in the variation noted.
+
+As per the codebook we can see that questions on medical care where covered under three option choices such as, govt should help, agree with both and people should take care of this thing themselves.
+
+As per the article dated 2017 in the pew research, 60% Americans say that government should be responsible for ensuring health care coverage for all Americans, compared with 38% who say this should not be the government's responsibility.
+
+However, the current data set in questions is between the periods of 1972-2012, it would be interesting to see if the respondents is this survey shared similar viewS, as debate on medicare has become more vocal in the recent years. It would be interesting to see how the views have evolved over the years. 
+
+Reference:
+http://pewrsr.ch/2j8yCPo
+
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+Data Preparation:
+
+-Clean data from the gss and upload into a new dataframe df
+-Select only the required fields year and helpsick.
+-Plot summary statistics to analyze initial findings.
+
+
+```{r}
+df<-gss%>%
+  select(year,helpsick)
+df<-df%>%
+  filter(!is.na(year))%>%
+  filter(!is.na(helpsick))
+
+summary(df)
+
+```
+
+
+
+Lets plot column chart to analyze the various responses on medical care. 
+
+```{r}
+
+ggplot(df, aes(year, fill=helpsick))+ geom_bar()+labs(x="year", y="Proportion of responses on medicare")
+
+```
+The proportion of respondents with People help Selves has been rising from 2002 to 2006.
+
+Plot the proportion of responds with People Help Selves by year.
+
+```{r}
+df_helpsick<-df%>%
+  group_by(year)%>%
+  summarise(success=sum(helpsick=="People Help Selves")/n())
+
+ggplot(df_helpsick, aes(year,success))+ geom_col()+labs(x="year", y="No. of respondents as-People Help Selves")
+
+```
+
+-From the column chart, we can see that three is steady increase in the no.of respondents who feel people should help selves and there is no need for government support. 
+
+-There is noticeable increase from year 2000 to 2010. We need to see if there is a statistical significance for the increase noted. 
+
+
+* * *
+
+## Part 4: Inference
+
+To help with statistical inference, lets assume "People Help Selves" as success and "Govt should Help" & "Agree with Both" as  failures and considering the proportions in the year 2000 and 2010.
+
+
+```{r}
+
+df_0010<-df
+
+df_0010<-filter(df_0010, year==2000|year==2010)
+
+df_backup0010<-df_0010
+
+df_0010<-str_replace(df_backup0010$helpsick,"Govt Should Help", "failure")
+df_backup0010$helpsick<-df_0010
+
+df_0010<-str_replace(df_backup0010$helpsick, "Agree With Both","failure")
+df_backup0010$helpsick<-df_0010
+
+df_backup0010$helpsick<-as.factor(df_backup0010$helpsick)
+
+df_backup0010_summary<-df_backup0010%>%
+  group_by(year)%>%
+  summarise(prop_success = sum(helpsick=="People Help Selves")/n())
+
+ggplot(df_backup0010_summary, aes(year,prop_success))+geom_col()+labs(x="year", y="proportion of success")
+
+```
+
+
+*State Hypothesis at α = 0.05*
+
+H0: p2000= p2012 
+
+HA: p2010>p2012 
+
+*Conditions for Central Limit Theorem*
+
+The conditions are as follows:
+
+Independence: sample size < 10% of the population
+
+```{r}
+
+df_backup0010$year<- as.factor(df_backup0010$year)
+
+df_backup0010%>%
+  group_by(year)%>%
+  summarise(n())
+
+```
+
+```{r}
+df_backup0010_summary
+
+```
+
+
+n2000 = 
+
+n2010 =
+
+We can safely conclude that these sample sizes are less than 10% of the population of the United States, therefore this condition is met.
+
+Success-failure condition: There should be at least 10 failures and 10 successes in each sample.
+(n2000)(p^2010) = 1234x0.0883 = 109
+(n2000)(1-p^2010)=1234x0.9117= 1125.03
+
+(n2010)(p^2010) = 960 x 0.142 = 136.32
+(n2010)(1-p^2010) = 960 x 0.858= 823.68
+
+As we can see, the success-failure condition is met in both the samples.
+
+Thus, we can use the Central Limit Theorem.
+
+*Methodology*
+
+There are 2 categorical variables, both being binary. Therefore, we use the z-statistic to calculate the p-value.
+
+The Confidence Interval for the difference in 2 population proportions (Z = 1.96 for 95% Confidence Level)
+
+p^2008 - p^2012 +/- ME
+where Margin of Error (ME) = Z(S.E.)*
+
+*Inference*
+
+```{r}
+inference(y = helpsick, x = year, data = df_backup0010,statistic = "proportion", type = "ht", null = 0, alternative = "twosided",method = "theoretical", success = "People Help Selves")
+
+```
+
+*Interpretation*
+
+-The p-value is less than α = 0.05 significance level, which means we can can reject the H0 in favor of the HA.
+
+-Thus, there is convincing evidence in favor of HA and the difference between the confidence levels is indeed statistically significant.
+
+-Thus there is significant evidence that the proportion of people in favor that people help themselves from the year 2000 to the year 2010 is statistically significant and is in agreement with the research cited, where although more are in favor are in support for government support however there has been increase in proportion of people not in favor for government support for health care.
+
+
+As corroborative proof, let’s calculate the Confidence Interval for the same data:
+
+```{r}
+inference(y = helpsick, x=year, data=df_backup0010,statistic = "proportion", type = "ci", method = "theoretical", success = "People Help Selves")
+
+```
+
+## Part 5: References
+
+David M Diez, Christopher D Barr and Mine Cetinkaya-Rundel. “OpenIntro Statistics, Third Edition”. (2016).
+
+“Statistics with R Specialization”, by Duke University on Coursera (coursera discussion forums)
+
+https://stackoverflow.com
+
+https://rstudio-pubs-static.s3.amazonaws.com/246821_6742d0ad2b0d4bea89143bc26c99cf00.html
+
